@@ -1,0 +1,350 @@
+<!doctype html>
+<html lang="tr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Hatice ile Sadık'ın buluşma testi</title>
+  <style>
+    :root{--pink:#ffd3e8;--deep:#ff9fcf}
+    html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial}
+    body{
+      background: linear-gradient(180deg,var(--pink),#ffeaf3);
+      display:flex;align-items:center;justify-content:center;overflow:hidden;
+    }
+    /* büyük arka plan yazısı */
+    .watermark{
+      position:fixed;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none;z-index:0;
+      font-weight:800;font-size:clamp(36px, 12vw, 160px);color:#fff3fa;opacity:0.9;transform:rotate(-10deg);
+      -webkit-text-stroke: 1px rgba(0,0,0,0.02);
+    }
+    .container{
+      position:relative;z-index:2;width:min(920px,94vw);max-width:1000px;padding:28px;border-radius:18px;backdrop-filter: blur(6px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.08);background:linear-gradient(180deg, rgba(255,255,255,0.6), rgba(255,255,255,0.45));
+      text-align:center;
+    }
+    .title{font-size:20px;font-weight:700;color:#b11a52;margin:6px 0 18px}
+    .question{
+      font-size:28px;font-weight:700;color:#6b0830;margin-bottom:26px
+    }
+    .message-box{
+      min-height:56px;max-width:720px;margin:0 auto 22px;padding:12px 16px;border-radius:12px;background:rgba(255,255,255,0.8);
+      box-shadow: inset 0 -1px 0 rgba(0,0,0,0.02);
+      display:flex;align-items:center;justify-content:center;font-size:18px;color:#5b0630;transition:all .18s ease;
+    }
+
+    /* butonların ortak stili */
+    .btn{
+      position:absolute;padding:14px 26px;border-radius:12px;border:0;font-weight:700;cursor:pointer;user-select:none;box-shadow:0 8px 20px rgba(107,8,48,0.12);
+      transform:translate(-50%,-50%);transition:transform .15s cubic-bezier(.2,.9,.3,1), left .15s, top .15s;
+      white-space:nowrap;background:linear-gradient(180deg,#fff,#ffeef8);
+      color:#6b0830;font-size:16px
+    }
+    .btn:active{transform:translate(-50%,-50%) scale(.98)}
+    #btn-evet{left:20%;top:68%;}
+    #btn-hayir{left:80%;top:68%;}
+
+    /* mesaj görünümü */
+    .final{font-size:20px;font-weight:800}
+    .phone{display:block;margin-top:8px;font-size:18px;font-weight:700;color:#2b0530}
+
+    /* küçük ekran düzeni */
+    @media (max-width:540px){
+      .question{font-size:20px}
+      #btn-evet{left:22%;top:76%}
+      #btn-hayir{left:78%;top:76%}
+    }
+    /* animasyonlar */
+    @keyframes floatIn {
+      0% {opacity:0; transform:translateY(20px);} 
+      100% {opacity:1; transform:translateY(0);} 
+    }
+    @keyframes pop {
+      0% {transform:scale(0.7);} 
+      70% {transform:scale(1.05);} 
+      100% {transform:scale(1);} 
+    }
+    .message-box { animation: floatIn .4s ease; }
+    .btn { transition: left .2s ease, top .2s ease, transform .15s ease; }
+    .btn.moved { animation: pop .25s ease; }
+    /* Ek animasyonlar */
+    @keyframes shake {
+      0%,100% {transform: translateX(0);} 
+      20% {transform: translateX(-4px);} 
+      40% {transform: translateX(4px);} 
+      60% {transform: translateX(-4px);} 
+      80% {transform: translateX(4px);} 
+    }
+    @keyframes bounce {
+      0% {transform: translateY(0);} 
+      40% {transform: translateY(-10px);} 
+      60% {transform: translateY(0);} 
+      80% {transform: translateY(-6px);} 
+      100% {transform: translateY(0);} 
+    }
+    @keyframes heartFloat {
+      0% {opacity:0; transform: translateY(20px) scale(.6);} 
+      100% {opacity:1; transform: translateY(-120px) scale(1);} 
+    }
+    .floating-heart{
+      position:absolute;
+      font-size:28px;
+      animation: heartFloat 2.4s linear forwards;
+      pointer-events:none;
+    }
+    .message-box { animation: floatIn .4s ease, fadeIn .3s ease; }
+    @keyframes fadeIn { from {opacity:0;} to {opacity:1;} }
+    /* Ek animasyon + papatya düşme efekti */
+    @keyframes daisyFall {
+      0% {transform: translateY(-100px) translateX(0) rotate(0deg); opacity:0;} 
+      25% {opacity:1;} 
+      50% {transform: translateY(50vh) translateX(-40px) rotate(180deg);} 
+      75% {transform: translateY(80vh) translateX(40px) rotate(260deg);} 
+      100% {transform: translateY(120vh) translateX(-20px) rotate(360deg); opacity:0.8;} 
+    }
+    .falling-daisy{
+      position: fixed;
+      top: -100px;
+      font-size: 40px;
+      pointer-events: none;
+      animation: daisyFall 6s linear forwards;
+    }
+  </style>
+</head>
+<body>
+  <div class="watermark">Hatice ile Sadık'ın buluşma testi</div>
+
+  <div class="container" id="app">
+    <div class="title">Hatice ile Sadık'ın buluşma testi</div>
+    <div class="question">Hatice, haftaya benimle buluşacak mısın?</div>
+
+    <div class="message-box" id="message">Cevabını seç :)</div>
+
+    <button class="btn" id="btn-evet">Evet</button>
+    <button class="btn" id="btn-hayir">Hayır</button>
+  </div>
+
+  <script>
+    // Mesaj dizisi ve ona uygun emojiler
+    const hayirMessages = [
+      {text: 'Ne yani? Beni artık sevmiyor musun?', emoji: '😢'},
+      {text: "Bak Melike'ye söylerim seni", emoji: '😏'},
+      {text: 'Hadi ama ne inatçı çıktın', emoji: '😅'},
+      {text: 'Sen sevgilini asla kırmazsın', emoji: '💖'},
+      {text: 'Ya ikna ol artık lütfen', emoji: '🙏'},
+      {text: "Bütün sınırları zorluyorum; Süleyman amcaya söyleyeceğim", emoji: '😬'}
+    ];
+
+    const messageBox = document.getElementById('message');
+    const btnEvet = document.getElementById('btn-evet');
+    const btnHayir = document.getElementById('btn-hayir');
+
+    let hayirCount = 0;
+
+    function showMessage(obj){
+      messageBox.innerHTML = `<span>${obj.emoji} &nbsp; ${obj.text}</span>`;
+    }
+
+    function showEvetMessage(){
+      messageBox.innerHTML = `<div class="final">Sadık seni çok ama çok seviyor — koş hemen ara!</div><span class="phone">0553 841 94 74 (sevgilin)</span>`;
+    }
+
+    function randomPositionAvoidingOverlap(btnToMove, others){
+      const container = document.getElementById('app');
+      const rect = container.getBoundingClientRect();
+      const padding = 12;
+      const w = btnToMove.offsetWidth;
+      const h = btnToMove.offsetHeight;
+      let attempts = 0;
+      while(attempts < 200){
+        attempts++;
+        const left = Math.random() * (rect.width - w - padding*2) + padding;
+        const top = Math.random() * (rect.height - h - padding*2) + padding;
+        const candidate = {left:left + rect.left, top: top + rect.top, right: left + rect.left + w, bottom: top + rect.top + h};
+        let ok = true;
+        for(const other of others){
+          const r = other.getBoundingClientRect();
+          const overlap = !(candidate.right < r.left + 6 || candidate.left > r.right - 6 || candidate.bottom < r.top + 6 || candidate.top > r.bottom - 6);
+          if(overlap){ ok = false; break; }
+        }
+        const msgRect = messageBox.getBoundingClientRect();
+        const overlapWithMsg = !(candidate.right < msgRect.left || candidate.left > msgRect.right || candidate.bottom < msgRect.top || candidate.top > msgRect.bottom);
+        if(overlapWithMsg) ok = false;
+        if(ok){
+          const leftPct = (left / rect.width) * 100;
+          const topPct = (top / rect.height) * 100;
+          btnToMove.style.left = leftPct + '%';
+          btnToMove.style.top = topPct + '%';
+          btnToMove.classList.add('moved');
+          setTimeout(()=> btnToMove.classList.remove('moved'),250);
+          return;
+        }
+      }
+      const fallbackLeft = Math.random()*60 + 20;
+      const fallbackTop = Math.random()*60 + 20;
+      btnToMove.style.left = fallbackLeft + '%';
+      btnToMove.style.top = fallbackTop + '%';
+      btnToMove.classList.add('moved');
+      setTimeout(()=> btnToMove.classList.remove('moved'),250);
+    }(btnToMove, others){
+      // hesaplama: button genişliklerinin ve container sınırlarının içinde rastgele pozisyon
+      const container = document.getElementById('app');
+      const rect = container.getBoundingClientRect();
+      const padding = 12; // kenarlardan boşluk
+
+      const w = btnToMove.offsetWidth;
+      const h = btnToMove.offsetHeight;
+
+      // dönüş sayısı sınırlaması
+      let attempts = 0;
+      while(attempts < 200){
+        attempts++;
+        const left = Math.random() * (rect.width - w - padding*2) + padding;
+        const top = Math.random() * (rect.height - h - padding*2) + padding;
+        const candidate = {left:left + rect.left, top: top + rect.top, right: left + rect.left + w, bottom: top + rect.top + h};
+
+        // çakışma kontrolü
+        let ok = true;
+        for(const other of others){
+          const r = other.getBoundingClientRect();
+          // overlap kontrolü (açıkça üst üste gelmemeli)
+          const overlap = !(candidate.right < r.left + 6 || candidate.left > r.right - 6 || candidate.bottom < r.top + 6 || candidate.top > r.bottom - 6);
+          if(overlap){ ok = false; break; }
+        }
+        // ayrıca messageBox'ın üzerine gelmemesin
+        const msgRect = messageBox.getBoundingClientRect();
+        const overlapWithMsg = !(candidate.right < msgRect.left || candidate.left > msgRect.right || candidate.bottom < msgRect.top || candidate.top > msgRect.bottom);
+        if(overlapWithMsg) ok = false;
+
+        if(ok){
+          // set as percentage relative to container for better responsiveness
+          const leftPct = (left / rect.width) * 100;
+          const topPct = (top / rect.height) * 100;
+          btnToMove.style.left = leftPct + '%';
+          btnToMove.style.top = topPct + '%';
+          return;
+        }
+      }
+      // eğer uygun pozisyon bulunamadıysa küçük kaydırma yap
+      const fallbackLeft = Math.random()*60 + 20;
+      const fallbackTop = Math.random()*60 + 20;
+      btnToMove.style.left = fallbackLeft + '%';
+      btnToMove.style.top = fallbackTop + '%';
+    }
+
+    btnHayir.addEventListener('click', (e)=>{
+      e.preventDefault();
+      // gösterilecek mesaj
+      const idx = Math.min(hayirCount, hayirMessages.length-1);
+      showMessage(hayirMessages[idx]);
+      hayirCount = Math.min(hayirCount + 1, hayirMessages.length);
+
+      // butonu rastgele konumlandır
+      // diğer butonları kontrol et: evet ve hayir'in kendisi hariç
+      randomPositionAvoidingOverlap(btnHayir, [btnEvet, btnHayir]);
+    });
+
+    btnEvet.addEventListener('click', ()=>{
+      confetti();
+      for(let i=0;i<15;i++) spawnDaisy();
+    });
+      showEvetMessage();
+      // isterseniz hayır butonunu görünmez yapabiliriz
+      btnHayir.style.display = 'none';
+      // isterseniz evet butonunu da sabitleyin
+      btnEvet.style.left = '50%';
+      btnEvet.style.top = '78%';
+    });
+
+    // sayfa yüklendiğinde buton pozisyonlarını container'a göre normalleştir
+    window.addEventListener('load', ()=>{
+      // küçük gecikme ile düzgün yerleştir
+      setTimeout(()=>{
+        const cont = document.getElementById('app').getBoundingClientRect();
+        // mevcut left/top değerleri yüzdeye dönüştür
+        [btnEvet, btnHayir].forEach(b=>{
+          const r = b.getBoundingClientRect();
+          const left = r.left - cont.left + (r.width/2);
+          const top = r.top - cont.top + (r.height/2);
+          b.style.left = (left/cont.width)*100 + '%';
+          b.style.top = (top/cont.height)*100 + '%';
+        });
+      },60);
+    });
+
+    // pencere boyutu değişince butonların container içinde kalmasını sağlamak için sınırla
+    window.addEventListener('resize', ()=>{
+      // yeniden konumlandırma yapma, sadece değerleri alap
+    });
+      function spawnDaisy(){
+      const d = document.createElement('div');
+      d.className='falling-daisy';
+      d.textContent='🌼';
+      d.style.left = Math.random()*100 + '%';
+      d.style.fontSize = (40 + Math.random()*20) + 'px';
+      document.body.appendChild(d);
+      setTimeout(()=> d.remove(), 6500);
+    }
+
+    // Yavaşça düşen papatyalar
+    // Yavaşça düşen papatyalar + sağa sola salınma
+    setInterval(()=>{
+      for(let i=0;i<3;i++) spawnDaisy();
+    },1300);(()=>{
+      for(let i=0;i<2;i++) spawnDaisy();
+    },1600);
+  </script>
+  <script>
+    function spawnHeart(){
+      const heart = document.createElement('div');
+      heart.className='floating-heart';
+      heart.textContent='💗';
+      const x = Math.random()*90 + 5;
+      const y = Math.random()*70 + 20;
+      heart.style.left = x+'%';
+      heart.style.top = '85%';
+      document.body.appendChild(heart);
+      setTimeout(()=> heart.remove(),2400);
+    }
+
+    function confetti(){
+      for(let i=0;i<25;i++){
+        const c = document.createElement('div');
+        c.style.position='fixed';
+        c.style.width='6px';
+        c.style.height='10px';
+        c.style.left=Math.random()*100+'%';
+        c.style.top='-10px';
+        c.style.backgroundColor= `hsl(${Math.random()*360},100%,60%)`;
+        c.style.opacity='0.9';
+        c.style.transform='rotate('+Math.random()*360+'deg)';
+        c.style.transition='top 1.8s linear, left 1.8s linear';
+        document.body.appendChild(c);
+        setTimeout(()=>{
+          c.style.top='110%';
+          c.style.left=Math.random()*100+'%';
+        },50);
+        setTimeout(()=> c.remove(),1900);
+      }
+    }
+
+    const btnEvet = document.getElementById('btn-evet');
+    const btnHayir = document.getElementById('btn-hayir');
+
+    btnHayir.addEventListener('mouseover', ()=>{
+      btnHayir.style.animation='shake .25s';
+      setTimeout(()=> btnHayir.style.animation='',260);
+      spawnHeart();
+    });
+
+    btnEvet.addEventListener('mouseover', ()=>{
+      btnEvet.style.animation='bounce .6s';
+      setTimeout(()=> btnEvet.style.animation='',650);
+      spawnHeart();
+    });
+
+    btnEvet.addEventListener('click', ()=>{
+      confetti();
+    });
+  </script>
+</body>
+</html>
